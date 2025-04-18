@@ -1,0 +1,29 @@
+<?php
+// ** Paramètres MySQL ** //
+define('DB_NAME', '{{ wordpress_db_name }}');
+define('DB_USER', '{{ wordpress_db_user }}');
+define('DB_PASSWORD', '{{ wordpress_db_password }}');
+define('DB_HOST', 'localhost');
+define('DB_CHARSET', 'utf8mb4');
+define('DB_COLLATE', '');
+
+// ==========================================
+// CLÉS DE SÉCURITÉ (À MODIFIER MANUELLEMENT)
+// ==========================================
+define('AUTH_KEY',         'wordpresssidney');
+define('SECURE_AUTH_KEY',  'wordpresssidney');
+define('LOGGED_IN_KEY',    'wordpresssidney');
+define('NONCE_KEY',        'wordpresssidney');
+define('AUTH_SALT',        'wordpresssidney');
+define('SECURE_AUTH_SALT', 'wordpresssidney');
+define('LOGGED_IN_SALT',   'wordpresssidney');
+define('NONCE_SALT',       'wordpresssidney');
+
+$table_prefix = 'wp_';
+define('WP_DEBUG', false);
+
+if (!defined('ABSPATH')) {
+    define('ABSPATH', __DIR__ . '/');
+}
+
+require_once ABSPATH . 'wp-settings.php';

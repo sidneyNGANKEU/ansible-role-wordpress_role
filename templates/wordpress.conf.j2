@@ -1,0 +1,14 @@
+<VirtualHost *:80>
+    ServerAdmin {{ wordpress_admin_email | default('admin@example.com') }}
+    DocumentRoot {{ wordpress_install_dir }}
+    ServerName {{ ansible_facts['fqdn'] | default(ansible_host) }}
+
+    <Directory {{ wordpress_install_dir }}>
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/wordpress-error.log
+    CustomLog ${APACHE_LOG_DIR}/wordpress-access.log combined
+</VirtualHost>

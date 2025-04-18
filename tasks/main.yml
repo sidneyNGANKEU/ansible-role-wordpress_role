@@ -1,0 +1,131 @@
+---
+- name: Vérifier que la famille d'OS est supportée
+  fail:
+    msg: "OS non supporté {{ ansible_facts['os_family'] }}. Seuls Debian et RedHat sont supportés."
+  when: ansible_facts['os_family'] not in ['Debian', 'RedHat']
+
+- name: Définir les variables selon l'OS
+  set_fact:
+    apache_user: "{{ 'www-data' if ansible_facts['os_family'] == 'Debian' else 'apache' }}"
+    apache_conf_dir: "{{ 'apache2/sites-available' if ansible_facts['os_family'] == 'Debian' else 'httpd/conf.d' }}"
+    apache_service: "{{ 'apache2' if ansible_facts['os_family'] == 'Debian' else 'httpd' }}"
+
+- name: Mettre à jour le cache des paquets (Debian)
+  apt:
+    update_cache: yes
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Installer les paquets requis
+  package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ ['php', 'php-mysql', 'php-cli', 'mariadb-server', 'wget', 'unzip'] + 
+           (['libapache2-mod-php'] if ansible_facts['os_family'] == 'Debian' else ['php-common']) }}"
+
+- name: Supprimer la page par défaut d'Apache
+  file:
+    path: /var/www/html/index.html
+    state: absent
+
+- name: Démarrer et activer MariaDB
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Attendre le démarrage de MariaDB
+  pause:
+    seconds: 10
+
+- name: Configurer MariaDB
+  block:
+    - name: Sécuriser l'installation
+      mysql_user:
+        login_user: root
+        login_password: ""
+        name: root
+        password: "{{ wordpress_db_root_password }}"
+        host: localhost
+        check_implicit_admin: yes
+
+    - name: Supprimer les utilisateurs anonymes
+      mysql_user:
+        login_user: root
+        login_password: "{{ wordpress_db_root_password }}"
+        name: ''
+        host: '%'
+        state: absent
+
+    - name: Supprimer la base test
+      mysql_db:
+        login_user: root
+        login_password: "{{ wordpress_db_root_password }}"
+        name: test
+        state: absent
+
+    - name: Créer la base WordPress
+      mysql_db:
+        login_user: root
+        login_password: "{{ wordpress_db_root_password }}"
+        name: "{{ wordpress_db_name }}"
+        state: present
+
+    - name: Créer l'utilisateur WordPress
+      mysql_user:
+        login_user: root
+        login_password: "{{ wordpress_db_root_password }}"
+        name: "{{ wordpress_db_user }}"
+        password: "{{ wordpress_db_password }}"
+        host: localhost
+        priv: "{{ wordpress_db_name }}.*:ALL"
+        state: present
+
+- name: Télécharger WordPress
+  get_url:
+    url: "{{ wordpress_download_url }}"
+    dest: /tmp/latest.zip
+
+- name: Décompresser WordPress
+  unarchive:
+    src: /tmp/latest.zip
+    dest: /tmp
+    remote_src: yes
+
+- name: Copier les fichiers WordPress
+  copy:
+    src: /tmp/wordpress/
+    dest: "{{ wordpress_install_dir }}"
+    remote_src: yes
+    owner: "{{ apache_user }}"
+    group: "{{ apache_user }}"
+    mode: '0755'
+
+- name: Configurer wp-config.php
+  template:
+    src: wp-config.php.j2
+    dest: "{{ wordpress_install_dir }}/wp-config.php"
+    owner: "{{ apache_user }}"
+    group: "{{ apache_user }}"
+    mode: '0640'
+
+- name: Configurer Apache
+  template:
+    src: wordpress.conf.j2
+    dest: "/etc/{{ apache_conf_dir }}/wordpress.conf"
+    notify: restart apache
+
+- name: Activer le module rewrite (Debian)
+  command: a2enmod rewrite
+  when: ansible_facts['os_family'] == 'Debian'
+  notify: restart apache
+
+- name: Activer le site (Debian)
+  command: a2ensite wordpress.conf
+  when: ansible_facts['os_family'] == 'Debian'
+  notify: restart apache
+
+- name: Démarrer Apache
+  service:
+    name: "{{ apache_service }}"
+    state: started
+    enabled: yes

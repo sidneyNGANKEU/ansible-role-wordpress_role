@@ -1,0 +1,18 @@
+---
+# Paramètres de base de données
+wordpress_db_name: sidneyDB
+wordpress_db_user: sidney
+wordpress_db_password: sidney
+wordpress_db_root_password: sidney
+
+# Paramètres d'installation
+wordpress_install_dir: /var/www/html
+wordpress_download_url: https://wordpress.org/latest.zip
+
+# Paramètres Apache
+wordpress_admin_email: "roche-sidney.ngankeu-sandji@supdevinci-edu.fr"
+apache_listen_port: 80
+
+# Paramètres PHP (optionnels)
+php_upload_max_filesize: 64M
+php_post_max_size: 128M
