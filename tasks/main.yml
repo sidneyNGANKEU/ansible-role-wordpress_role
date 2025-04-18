@@ -15,6 +15,37 @@
     update_cache: yes
   when: ansible_facts['os_family'] == 'Debian'
 
+- name: Installer pip pour Python 3 (Debian/Ubuntu)
+  apt:
+    name: python3-pip
+    state: present
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Installer les modules Python MySQL (Debian/Ubuntu)
+  pip:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - pymysql
+    - mysqlclient
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Installer pip pour Python 3 (RedHat/Rocky Linux)
+  package:
+    name: python3-pip
+    state: present
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Installer les modules Python MySQL (RedHat/Rocky Linux)
+  pip:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - PyMySQL
+    - mysqlclient
+    - mysql-connector-python
+  when: ansible_facts['os_family'] == 'RedHat'
+
 - name: Installer les paquets requis (Debian/Ubuntu)
   package:
     name: "{{ item }}"
@@ -27,7 +58,6 @@
     - wget
     - unzip
     - libapache2-mod-php
-    - apt-utils
   when: ansible_facts['os_family'] == 'Debian'
 
 - name: Installer les paquets requis (RedHat/Rocky Linux)
