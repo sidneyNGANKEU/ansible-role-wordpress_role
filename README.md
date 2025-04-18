@@ -1,4 +1,4 @@
-# Rôle Ansible pour WordPress (Option 1)
+# Rôle Ansible pour WordPress
 
 Installe WordPress avec MariaDB sur Ubuntu/Debian ou Rocky/RHEL.
 
