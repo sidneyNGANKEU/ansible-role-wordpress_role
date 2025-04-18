@@ -26,7 +26,7 @@
         'mariadb-server',
         'wget',
         'unzip']
-      + (['libapache2-mod-php', 'apt-utils'] if ansible_facts['os_family'] == 'Debian' else ['mod_php', 'php-mysqlnd'])
+      + (['libapache2-mod-php', 'apt-utils'] if ansible_facts['os_family'] == 'Debian' else []) # On retire 'mod_php' temporairement
     }}
 
 - name: Supprimer la page par défaut d'Apache
