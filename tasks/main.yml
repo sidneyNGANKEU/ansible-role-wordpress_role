@@ -16,6 +16,7 @@
   when: ansible_facts['os_family'] == 'Debian'
 
 - name: Installer les paquets requis
+  # On retire 'mod_php' temporairement
   package:
     name: "{{ item }}"
     state: present
@@ -26,7 +27,7 @@
         'mariadb-server',
         'wget',
         'unzip']
-      + (['libapache2-mod-php', 'apt-utils'] if ansible_facts['os_family'] == 'Debian' else []) # On retire 'mod_php' temporairement
+      + (['libapache2-mod-php', 'apt-utils'] if ansible_facts['os_family'] == 'Debian' else [])
     }}
 
 - name: Supprimer la page par défaut d'Apache
