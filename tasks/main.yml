@@ -19,8 +19,15 @@
   package:
     name: "{{ item }}"
     state: present
-  loop: "{{ ['php', 'php-mysql', 'php-cli', 'mariadb-server', 'wget', 'unzip'] + 
-           (['libapache2-mod-php'] if ansible_facts['os_family'] == 'Debian' else ['php-common']) }}"
+  loop: >-
+    {{ ['php',
+        ('php-mysqlnd' if ansible_facts['os_family'] == 'Debian' else 'php-mysql'),
+        'php-cli',
+        'mariadb-server',
+        'wget',
+        'unzip']
+      + (['libapache2-mod-php', 'apt-utils'] if ansible_facts['os_family'] == 'Debian' else ['mod_php', 'php-mysqlnd'])
+    }}
 
 - name: Supprimer la page par défaut d'Apache
   file:
