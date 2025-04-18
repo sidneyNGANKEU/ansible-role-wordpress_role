@@ -41,7 +41,7 @@
     - mariadb-server
     - wget
     - unzip
-    - mod_php
+    - php-httpd  # Remplacer par le nom correct trouvé
   when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Supprimer la page par défaut d'Apache
