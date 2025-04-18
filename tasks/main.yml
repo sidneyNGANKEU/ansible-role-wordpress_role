@@ -15,20 +15,34 @@
     update_cache: yes
   when: ansible_facts['os_family'] == 'Debian'
 
-- name: Installer les paquets requis
-  # On retire 'mod_php' temporairement
+- name: Installer les paquets requis (Debian/Ubuntu)
   package:
     name: "{{ item }}"
     state: present
-  loop: >-
-    {{ ['php',
-        ('php-mysqlnd' if ansible_facts['os_family'] == 'Debian' else 'php-mysql'),
-        'php-cli',
-        'mariadb-server',
-        'wget',
-        'unzip']
-      + (['libapache2-mod-php', 'apt-utils'] if ansible_facts['os_family'] == 'Debian' else [])
-    }}
+  loop:
+    - php
+    - php-mysqlnd
+    - php-cli
+    - mariadb-server
+    - wget
+    - unzip
+    - libapache2-mod-php
+    - apt-utils
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Installer les paquets requis (RedHat/Rocky Linux)
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - php
+    - php-mysqlnd
+    - php-cli
+    - mariadb-server
+    - wget
+    - unzip
+    - mod_php
+  when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Supprimer la page par défaut d'Apache
   file:
